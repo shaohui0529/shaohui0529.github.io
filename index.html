@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>优势测评 - 阿优</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+  #coze-chat { width: 100%; height: 100vh; }
+</style>
+</head>
+<body>
+<div id="coze-chat"></div>
+
+<!-- Coze Chat SDK -->
+<script src="https://lf-cdn.coze.cn/obj/unpkg/flow-platform/chat-app-sdk/1.2.0-beta.20/libs/cn/index.js"></script>
+<script>
+new CozeWebSDK.WebChatClient({
+  config: {
+    type: 'bot',
+    bot_id: '7695787574597697571',
+    isIframe: false,
+  },
+  auth: {
+    token: 'pat_eoSSHV7NfH2OweB3DT9Ue9DH5OEoUAN4q8BXA2v4A5CjSlQIjsDyOd4JRCjLUiYZ',
+  },
+  componentProps: {
+    title: '阿优 - 优势探索伙伴',
+  },
+});
+</script>
+</body>
+</html>
+
+<script>
+const BOT_ID = '7695787574597697571';
+const API_TOKEN = 'pat_eoSSHV7NfH2OweB3DT9Ue9DH5OEoUAN4q8BXA2v4A5CjSlQIjsDyOd4JRCjLUiYZ';
+const API_BASE = 'https://api.coze.cn';
+
+let conversationId = null;
+let isProcessing = false;
+let messageCount = 0;
+
+function showError(msg) {
+  const errorEl = document.getElementById('errorMsg');
+  errorEl.textContent = '⚠️ ' + msg;
+  errorEl.classList.add('show');
+  setTimeout(() => errorEl.classList.remove('show'), 5000);
+}
+
+function addMessage(role, content) {
+  const messagesDiv = document.getElementById('messages');
+  const msgDiv = document.createElement('div');
+  msgDiv.className = 'message ' + role;
+  
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble';
+  bubble.textContent = content;
+  
+  msgDiv.appendChild(bubble);
+  messagesDiv.appendChild(msgDiv);
+  messagesDiv.scrollTop = messagesDiv.scrollHeight;
+}
+
+function showTyping() {
+  const messagesDiv = document.getElementById('messages');
+  const msgDiv = document.createElement('div');
+  msgDiv.className = 'message bot';
+  msgDiv.id = 'typingIndicator';
+  
+  const typing = document.createElement('div');
+  typing.className = 'typing';
+  typing.innerHTML = '<span></span><span></span><span></span>';
+  
+  msgDiv.appendChild(typing);
+  messagesDiv.appendChild(msgDiv);
+  messagesDiv.scrollTop = messagesDiv.scrollHeight;
+}
+
+function hideTyping() {
+  const typing = document.getElementById('typingIndicator');
+  if (typing) typing.remove();
+}
+
+function handleKeyPress(event) {
+  if (event.key === 'Enter' && !isProcessing) {
+    sendMessage();
+  }
+}
+
+async function sendMessage() {
+  const input = document.getElementById('userInput');
+  const sendBtn = document.getElementById('sendBtn');
+  const text = input.value.trim();
+  
+  if (!text || isProcessing) return;
+  
+  isProcessing = true;
+  sendBtn.disabled = true;
+  input.value = '';
+  
+  addMessage('user', text);
+  showTyping();
+  
+  try {
+    const response = await fetch(API_BASE + '/v3/chat', {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + API_TOKEN,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        bot_id: BOT_ID,
+        user_id: 'user_' + Date.now(),
+        stream: false,
+        auto_save_history: true,
+        additional_messages: [
+          {
+            role: 'user',
+            content: text,
+            content_type: 'text'
+          }
+        ]
+      })
+    });
+    
+    const data = await response.json();
+    
+    hideTyping();
+    
+    if (data.code === 0 && data.data) {
+      // 等待对话完成
+      await pollChatResult(data.data.id);
+      messageCount++;
+      
+      // 显示报告按钮（对话超过5轮后）
+      if (messageCount >= 5) {
+        document.getElementById('reportSection').classList.add('show');
+      }
+    } else {
+      addMessage('bot', '抱歉，我好像走神了🤔 能再说一遍吗？');
+    }
+  } catch (err) {
+    hideTyping();
+    console.error('Error:', err);
+    showError('网络连接失败，请检查网络后重试');
+    addMessage('bot', '网络好像出了点问题，稍后再试一下吧～');
+  } finally {
+    isProcessing = false;
+    sendBtn.disabled = false;
+    input.focus();
+  }
+}
+
+async function pollChatResult(chatId) {
+  const maxAttempts = 30;
+  let attempts = 0;
+  
+  while (attempts < maxAttempts) {
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    attempts++;
+    
+    try {
+      const response = await fetch(API_BASE + '/v3/chat/retrieve?conversation_id=' + conversationId + '&chat_id=' + chatId, {
+        headers: {
+          'Authorization': 'Bearer ' + API_TOKEN,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      const data = await response.json();
+      
+      if (data.code === 0 && data.data) {
+        const status = data.data.status;
+        
+        if (status === 'completed') {
+          // 获取消息列表
+          await getMessages(conversationId, chatId);
+          return;
+        } else if (status === 'failed') {
+          addMessage('bot', '抱歉，我这边出了点问题，稍后再试一下吧～');
+          return;
+        }
+      }
+    } catch (err) {
+      console.error('Poll error:', err);
+    }
+  }
+  
+  addMessage('bot', '回复超时了，请再试一次～');
+}
+
+async function getMessages(conversationId, chatId) {
+  try {
+    const response = await fetch(API_BASE + '/v3/chat/message/list?conversation_id=' + conversationId + '&chat_id=' + chatId, {
+      headers: {
+        'Authorization': 'Bearer ' + API_TOKEN,
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    const data = await response.json();
+    
+    if (data.code === 0 && data.data) {
+      // 只取最后一条assistant消息
+      const messages = data.data;
+      const lastAssistant = messages.filter(m => m.role === 'assistant').pop();
+      
+      if (lastAssistant && lastAssistant.content) {
+        addMessage('bot', lastAssistant.content);
+      }
+    }
+  } catch (err) {
+    console.error('Get messages error:', err);
+  }
+}
+
+function showReport() {
+  alert('报告生成功能开发中...\n\n完整报告请联系邵辉老师获取\n微信：shaohui_hr');
+}
+
+// 初始化
+document.addEventListener('DOMContentLoaded', function() {
+  document.getElementById('userInput').focus();
+  addMessage('bot', '你好呀！我是阿优，你的优势探索伙伴🌟\n\n今天咱们轻松聊聊天，帮我了解你，也帮你发现自己的优势。\n\n先聊几个简单的问题，好吗？\n\n你平时是更喜欢独处思考，还是跟人碰撞想法？');
+});
+</script>
+</body>
+</html>
