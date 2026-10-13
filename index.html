@@ -18,20 +18,22 @@
 <script>
 new CozeWebSDK.WebChatClient({
   config: {
-    type: 'bot',
-    bot_id: '7695787574597697571',
+    botId: '7695787574597697571',
     isIframe: false,
   },
   auth: {
     type: 'token',
     token: 'pat_eoSSHV7NfH2OweB3DT9Ue9DH5OEoUAN4q8BXA2v4A5CjSlQIjsDyOd4JRCjLUiYZ',
-    onRefreshToken: function() {
-      return 'pat_eoSSHV7NfH2OweB3DT9Ue9DH5OEoUAN4q8BXA2v4A5CjSlQIjsDyOd4JRCjLUiYZ';
-    },
+    onRefreshToken: async () => 'pat_eoSSHV7NfH2OweB3DT9Ue9DH5OEoUAN4q8BXA2v4A5CjSlQIjsDyOd4JRCjLUiYZ',
   },
   componentProps: {
     title: '阿优 - 优势探索伙伴',
   },
+  ui: {
+    asstBtn: {
+      isNeed: false
+    }
+  }
 });
 </script>
 </body>
