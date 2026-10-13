@@ -25,6 +25,9 @@ new CozeWebSDK.WebChatClient({
   auth: {
     type: 'token',
     token: 'pat_eoSSHV7NfH2OweB3DT9Ue9DH5OEoUAN4q8BXA2v4A5CjSlQIjsDyOd4JRCjLUiYZ',
+    onRefreshToken: function() {
+      return 'pat_eoSSHV7NfH2OweB3DT9Ue9DH5OEoUAN4q8BXA2v4A5CjSlQIjsDyOd4JRCjLUiYZ';
+    },
   },
   componentProps: {
     title: '阿优 - 优势探索伙伴',
