@@ -6,42 +6,155 @@
 <title>优势测评 - 阿优</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
-  #coze-chat { width: 100%; height: 100vh; }
-  /* 隐藏AI思考过程 */
-  .coze-think-box,
-  [class*="think"],
-  [class*="thinking"] { display: none !important; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+  }
+  .container {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    max-width: 420px;
+    width: 100%;
+    height: 80vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px;
+    text-align: center;
+  }
+  .header h1 { font-size: 22px; margin-bottom: 5px; }
+  .header p { font-size: 13px; opacity: 0.9; }
+  .messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    background: #f8f9fa;
+  }
+  .message {
+    margin-bottom: 15px;
+    display: flex;
+    animation: fadeIn 0.3s ease;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .message.user { justify-content: flex-end; }
+  .message.bot { justify-content: flex-start; }
+  .bubble {
+    max-width: 80%;
+    padding: 12px 16px;
+    border-radius: 18px;
+    font-size: 14px;
+    line-height: 1.6;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+  }
+  .message.user .bubble {
+    background: #667eea;
+    color: white;
+    border-bottom-right-radius: 4px;
+  }
+  .message.bot .bubble {
+    background: white;
+    color: #333;
+    border-bottom-left-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+  .typing {
+    display: inline-block;
+    padding: 12px 16px;
+    background: white;
+    border-radius: 18px;
+    border-bottom-left-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+  .typing span {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background: #667eea;
+    border-radius: 50%;
+    margin: 0 2px;
+    animation: bounce 1.4s infinite ease-in-out;
+  }
+  .typing span:nth-child(2) { animation-delay: 0.2s; }
+  .typing span:nth-child(3) { animation-fill-mode: 0.4s; }
+  @keyframes bounce {
+    0%, 80%, 100% { transform: scale(0); }
+    40% { transform: scale(1); }
+  }
+  .input-area {
+    padding: 15px 20px;
+    background: white;
+    border-top: 1px solid #eee;
+    display: flex;
+    gap: 10px;
+  }
+  .input-area input {
+    flex: 1;
+    padding: 12px 16px;
+    border: 2px solid #e0e0e0;
+    border-radius: 25px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.3s;
+  }
+  .input-area input:focus { border-color: #667eea; }
+  .input-area button {
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 25px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+  .input-area button:hover { transform: scale(1.05); }
+  .input-area button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+  .error-msg {
+    background: #ffebee;
+    color: #c62828;
+    padding: 12px;
+    border-radius: 8px;
+    margin: 10px 20px;
+    font-size: 13px;
+    display: none;
+  }
+  .error-msg.show { display: block; }
 </style>
 </head>
 <body>
-<div id="coze-chat"></div>
-
-<!-- Coze Chat SDK -->
-<script src="https://lf-cdn.coze.cn/obj/unpkg/flow-platform/chat-app-sdk/1.2.0-beta.20/libs/cn/index.js"></script>
-<script>
-new CozeWebSDK.WebChatClient({
-  config: {
-    botId: '7695787574597697571',
-    isIframe: false,
-  },
-  auth: {
-    type: 'token',
-    token: 'pat_eoSSHV7NfH2OweB3DT9Ue9DH5OEoUAN4q8BXA2v4A5CjSlQIjsDyOd4JRCjLUiYZ',
-    onRefreshToken: async () => 'pat_eoSSHV7NfH2OweB3DT9Ue9DH5OEoUAN4q8BXA2v4A5CjSlQIjsDyOd4JRCjLUiYZ',
-  },
-  componentProps: {
-    title: '阿优 - 优势探索伙伴',
-  },
-  ui: {
-    asstBtn: {
-      isNeed: false
-    }
-  }
-});
-</script>
-</body>
-</html>
+<div class="container">
+  <div class="header">
+    <h1>🌟 阿优</h1>
+    <p>你的优势探索伙伴 · 10分钟发现你的天赋</p>
+  </div>
+  
+  <div class="error-msg" id="errorMsg"></div>
+  
+  <div class="messages" id="messages"></div>
+  
+  <div class="input-area">
+    <input type="text" id="userInput" placeholder="输入你的回答..." onkeypress="handleKeyPress(event)">
+    <button id="sendBtn" onclick="sendMessage()">发送</button>
+  </div>
+</div>
 
 <script>
 const BOT_ID = '7695787574597697571';
@@ -50,7 +163,6 @@ const API_BASE = 'https://api.coze.cn';
 
 let conversationId = null;
 let isProcessing = false;
-let messageCount = 0;
 
 function showError(msg) {
   const errorEl = document.getElementById('errorMsg');
@@ -114,25 +226,31 @@ async function sendMessage() {
   showTyping();
   
   try {
+    const requestBody = {
+      bot_id: BOT_ID,
+      user_id: 'user_' + Date.now(),
+      stream: false,
+      auto_save_history: true,
+      additional_messages: [
+        {
+          role: 'user',
+          content: text,
+          content_type: 'text'
+        }
+      ]
+    };
+    
+    if (conversationId) {
+      requestBody.conversation_id = conversationId;
+    }
+    
     const response = await fetch(API_BASE + '/v3/chat', {
       method: 'POST',
       headers: {
         'Authorization': 'Bearer ' + API_TOKEN,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({
-        bot_id: BOT_ID,
-        user_id: 'user_' + Date.now(),
-        stream: false,
-        auto_save_history: true,
-        additional_messages: [
-          {
-            role: 'user',
-            content: text,
-            content_type: 'text'
-          }
-        ]
-      })
+      body: JSON.stringify(requestBody)
     });
     
     const data = await response.json();
@@ -140,16 +258,14 @@ async function sendMessage() {
     hideTyping();
     
     if (data.code === 0 && data.data) {
-      // 等待对话完成
-      await pollChatResult(data.data.id);
-      messageCount++;
+      conversationId = data.data.conversation_id;
+      const chatId = data.data.id;
       
-      // 显示报告按钮（对话超过5轮后）
-      if (messageCount >= 5) {
-        document.getElementById('reportSection').classList.add('show');
-      }
+      // 等待对话完成
+      await pollChatResult(conversationId, chatId);
     } else {
       addMessage('bot', '抱歉，我好像走神了🤔 能再说一遍吗？');
+      console.error('API Error:', data);
     }
   } catch (err) {
     hideTyping();
@@ -163,7 +279,7 @@ async function sendMessage() {
   }
 }
 
-async function pollChatResult(chatId) {
+async function pollChatResult(convId, chatId) {
   const maxAttempts = 30;
   let attempts = 0;
   
@@ -172,7 +288,7 @@ async function pollChatResult(chatId) {
     attempts++;
     
     try {
-      const response = await fetch(API_BASE + '/v3/chat/retrieve?conversation_id=' + conversationId + '&chat_id=' + chatId, {
+      const response = await fetch(API_BASE + '/v3/chat/retrieve?conversation_id=' + convId + '&chat_id=' + chatId, {
         headers: {
           'Authorization': 'Bearer ' + API_TOKEN,
           'Content-Type': 'application/json'
@@ -185,8 +301,7 @@ async function pollChatResult(chatId) {
         const status = data.data.status;
         
         if (status === 'completed') {
-          // 获取消息列表
-          await getMessages(conversationId, chatId);
+          await getMessages(convId, chatId);
           return;
         } else if (status === 'failed') {
           addMessage('bot', '抱歉，我这边出了点问题，稍后再试一下吧～');
@@ -201,9 +316,9 @@ async function pollChatResult(chatId) {
   addMessage('bot', '回复超时了，请再试一次～');
 }
 
-async function getMessages(conversationId, chatId) {
+async function getMessages(convId, chatId) {
   try {
-    const response = await fetch(API_BASE + '/v3/chat/message/list?conversation_id=' + conversationId + '&chat_id=' + chatId, {
+    const response = await fetch(API_BASE + '/v3/chat/message/list?conversation_id=' + convId + '&chat_id=' + chatId, {
       headers: {
         'Authorization': 'Bearer ' + API_TOKEN,
         'Content-Type': 'application/json'
@@ -213,9 +328,8 @@ async function getMessages(conversationId, chatId) {
     const data = await response.json();
     
     if (data.code === 0 && data.data) {
-      // 只取最后一条assistant消息
       const messages = data.data;
-      const lastAssistant = messages.filter(m => m.role === 'assistant').pop();
+      const lastAssistant = messages.filter(m => m.role === 'assistant' && m.content && !m.content.includes('msg_type')).pop();
       
       if (lastAssistant && lastAssistant.content) {
         addMessage('bot', lastAssistant.content);
@@ -224,10 +338,6 @@ async function getMessages(conversationId, chatId) {
   } catch (err) {
     console.error('Get messages error:', err);
   }
-}
-
-function showReport() {
-  alert('报告生成功能开发中...\n\n完整报告请联系邵辉老师获取\n微信：shaohui_hr');
 }
 
 // 初始化
